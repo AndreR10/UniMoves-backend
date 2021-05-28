@@ -19,7 +19,7 @@ class PaymentWritePermission(BasePermission):
             return True
 
         if request.user.is_landlord == True:
-            return obj.landlord_ == request.user
+            return obj.landlord_ == request.user    
         elif request.user.is_tenant == True:
             return obj.tenant == request.user
 
@@ -41,7 +41,7 @@ class PaymentVisualizeView(viewsets.ReadOnlyModelViewSet):
             return None
 
     
-class PaymentView(viewsets.ModelViewSet, PaymentWritePermission):
+class MakePaymentView(viewsets.ModelViewSet, PaymentWritePermission):
     permission_classes = [PaymentWritePermission]
     serializer_class = PaymentSerializer
 
@@ -54,22 +54,16 @@ class PaymentView(viewsets.ModelViewSet, PaymentWritePermission):
         return Payment.objects.all() 
 
     def create(self, request, *args, **kwargs):
-        lease = Lease.objects.get(pk=self.request.data.get('lease'))
+        serializer = PaymentSerializer(data=request.data, many=True)
 
-        payment = Payment.objects.create(
-            lease = lease,
-            tenant = lease.tenant,
-            landlord = lease.landlord,
-            landlord_iban = lease.landlord.landlord_iban,
-            completed = True,
-            amount = self.request.data.get('amount'),
-        )
-        serializer = PaymentSerializer(payment)
-
-        return Response(serializer.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        return Response(serializer.errors)
 
 
-class LandlordPaymentView(viewsets.ModelViewSet, PaymentWritePermission):
+class MyPaymentView(viewsets.ModelViewSet, PaymentWritePermission):
     permission_classes = [PaymentWritePermission]
     serializer_class = PaymentSerializer
 
@@ -86,8 +80,14 @@ class LandlordPaymentView(viewsets.ModelViewSet, PaymentWritePermission):
             lease = Lease.objects.get(pk=self.request.query_params.get('lease'))
 
         if user is not None and lease is not None:
-            return Payment.objects.filter(lease=lease).filter(landlord=user)
+            if user.is_tenant == True:
+                return Payment.objects.filter(lease=lease).filter(tenant=user)
+            else:
+                return Payment.objects.filter(lease=lease).filter(landlord=user)
         if user is not None:
-            return Payment.objects.filter(landlord=user)
+            if user.is_tenant == True:
+                return Payment.objects.filter(tenant=user)
+            else:
+                return Payment.objects.filter(landlord=user)
         else:
             return None

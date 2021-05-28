@@ -2,7 +2,7 @@ from django.db import models
 
 
 CONTRACT_TYPES = [
-    ('B', 'Biweekly'),
+    ('M', 'Monthly'),
     ('Y', 'Yearly'),
     ('S', 'Semiannual'),
 ]

@@ -11,7 +11,7 @@ class Lease(models.Model):
     landlord = models.ForeignKey('user.User',
                                  related_name='landlord_lease',
                                  on_delete=models.CASCADE)
-    begin_date = models.DateField(default=date.today)
+    begin_date = models.DateField()
     end_date = models.DateField()
     is_active = models.BooleanField(default=False)
 

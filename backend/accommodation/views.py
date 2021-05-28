@@ -191,15 +191,16 @@ class LandlordAccommodationView(viewsets.ModelViewSet, AccommodationWritePermiss
         return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
-        accommodation = Accommodation.objects.get(slug=self.request.data.get('slug'))
         data = self.request.data
+        user = User.objects.get(pk=self.request.data.get('landlord'))
+        accommodation = Accommodation.objects.filter(landlord=user).get(slug=self.request.data.get('slug'))
+        
         data.pop('slug')
-
-        for key in data:
-            setattr(accommodation, key, self.request.data.get(key))
-
-        serializer = AccommodationSerializer(accommodation, data=data)
+        
+        serializer = AccommodationSerializer(accommodation, data=data, partial=True)
+        
         if serializer.is_valid():
             serializer.save()
-
-        return Response(serializer.data)
+            return Response(serializer.data)
+        
+        return Response(serializer.errors)

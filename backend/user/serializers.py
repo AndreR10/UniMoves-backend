@@ -9,25 +9,12 @@ from datetime import timezone
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = (
-            'id',
-            'full_name',
-            'email',
-            'password',
-            'gender',
-            'picture',
-            'birth_date',
-            'phone_number',
-            'educational_institution',
-            'role',
-            'type_landlord',
-            'landlord_iban',
-            'nif',
-            'rating',
-            'slug',
-            'is_tenant',
-            'is_landlord',
-        )
+        fields = [
+            'id', 'full_name', 'email', 'password', 'gender', 'picture',
+            'birth_date', 'phone_number', 'educational_institution',
+            'role', 'type_landlord', 'landlord_iban', 'nif', 'rating',
+            'slug', 'is_tenant', 'is_landlord',
+        ]
 
 
 class CustomRegisterSerializer(RegisterSerializer):
