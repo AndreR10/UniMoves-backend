@@ -22,7 +22,7 @@ class ReceiptWritePermission(BasePermission):
             return obj.tenant_nif == request.user.nif
 
 
-class ReceiptPaymentView(viewsets.ReadOnlyModelViewSet):
+class ReceiptView(viewsets.ReadOnlyModelViewSet):
     serializer_class = ReceiptSerializer
 
     def get_object(self, queryset=None, **kwargs):
@@ -31,24 +31,6 @@ class ReceiptPaymentView(viewsets.ReadOnlyModelViewSet):
         return generics.get_object_or_404(Receipt, pk=item)
 
     def get_queryset(self):
-        payment = Payment.objects.get(pk=self.request.query_params.get('payment', None))
-
-        if payment is not None:
-            return Receipt.objects.filter(payment=payment)
-        else:
-            return None
-
-    
-class ReceiptView(viewsets.ModelViewSet, ReceiptWritePermission):
-    permission_classes = [ReceiptWritePermission]
-    serializer_class = ReceiptSerializer
-
-    def get_object(self, queryset=None, **kwargs):
-        item = self.kwargs.get("pk")
-
-        return generics.get_object_or_404(Receipt, pk=item)
-
-    def get_queryset(self, *args, **kwargs):
         user = User.objects.get(email=self.request.user)
 
         if user.is_landlord == True:
@@ -56,14 +38,11 @@ class ReceiptView(viewsets.ModelViewSet, ReceiptWritePermission):
         elif user.is_tenant == True:
             return Receipt.objects.filter(tenant_nif=user.nif)
 
-    def create(self, request, *args, **kwargs):
-        payment = Payment.objects.get(pk=self.request.data.get('payment'))
+        payment = Payment.objects.filter(
+            lease=self.request.query_params.get('lease', None)
+        ).get(payment_number=self.request.query_params.get('payment_number', None))
 
-        receipt = Receipt.objects.create(
-            payment = payment,
-            tenant_nif = payment.tenant.nif,
-            landlord_nif = payment.landlord.nif
-        )
-        serializer = ReceiptSerializer(receipt)
-
-        return Response(serializer.data)
+        if payment is not None:
+            return Receipt.objects.filter(payment=payment)
+        else:
+            return None

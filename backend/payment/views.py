@@ -7,6 +7,7 @@ from lease.models import Lease
 from receipt.models import Receipt
 from .models import Payment
 from .serializers import PaymentSerializer
+from receipt.serializers import ReceiptSerializer
 
 from datetime import datetime
 
@@ -54,7 +55,13 @@ class MakePaymentView(viewsets.ModelViewSet, PaymentWritePermission):
         return Payment.objects.all() 
 
     def create(self, request, *args, **kwargs):
-        serializer = PaymentSerializer(data=request.data, many=True)
+        data = self.request.data
+        
+        for payment in data:
+            landlord = User.objects.get(pk=payment.get('landlord'))
+            payment['landlord_iban'] = landlord.landlord_iban
+
+        serializer = PaymentSerializer(data=data, many=True)
 
         if serializer.is_valid():
             serializer.save()
@@ -76,14 +83,14 @@ class MyPaymentView(viewsets.ModelViewSet, PaymentWritePermission):
         user = User.objects.get(email=self.request.user)
         lease = self.request.query_params.get('lease', None)
 
-        if lease is not None:
+        if user is not None and lease is not None:
             lease = Lease.objects.get(pk=self.request.query_params.get('lease'))
 
-        if user is not None and lease is not None:
             if user.is_tenant == True:
                 return Payment.objects.filter(lease=lease).filter(tenant=user)
             else:
                 return Payment.objects.filter(lease=lease).filter(landlord=user)
+
         if user is not None:
             if user.is_tenant == True:
                 return Payment.objects.filter(tenant=user)
@@ -91,3 +98,23 @@ class MyPaymentView(viewsets.ModelViewSet, PaymentWritePermission):
                 return Payment.objects.filter(landlord=user)
         else:
             return None
+
+    def update(self, request, *args, **kwargs):
+        lease = Lease.objects.get(pk=self.kwargs['pk'])
+        payment = Payment.objects.filter(lease=lease).get(payment_number=self.request.data.get('payment_number'))
+        
+        receipt = Receipt.objects.create(
+            payment = payment,
+            tenant_nif = payment.tenant.nif,
+            landlord_nif = payment.landlord.nif
+        )
+        receipt_serializer = ReceiptSerializer(receipt)
+        
+        payment_serializer = PaymentSerializer(payment, data=self.request.data, partial=True)
+        
+        if payment_serializer.is_valid():
+            payment_serializer.save()
+
+            return Response(payment_serializer.data)
+        
+        return Response(payment_serializer.errors)
