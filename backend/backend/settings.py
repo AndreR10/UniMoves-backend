@@ -138,7 +138,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 STATIC_URL = '/static/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -160,7 +160,7 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 # ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 # ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 
-LOGIN_URL = '/auth/login'
+LOGIN_URL = 'http://localhost:8000/auth/login'
 
 AUTH_USER_MODEL = 'user.User'
 
@@ -194,7 +194,7 @@ REST_FRAMEWORK = {
     # ('rest_framework_simplejwt.authentication.JWTAuthentication', )
 }
 
-ALLOWED_HOSTS = ['35.197.233.147']
+ALLOWED_HOSTS = ['*']
 CORS_ALLOW_ALL_ORIGINS = True
 #CORS_ORIGIN_WHITELIST = ('http://localhost:3000', )
 CORS_ALLOW_CREDENTIALS = True

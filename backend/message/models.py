@@ -8,4 +8,4 @@ class Message(models.Model):
     user = models.ForeignKey("user.User", on_delete=models.CASCADE)
     text = models.TextField(max_length=500)
     date = models.DateTimeField(default=datetime.now)
-    viewed = models.BooleanField(default=False)
+    # viewed = models.BooleanField(default=False)

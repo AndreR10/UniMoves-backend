@@ -10,3 +10,5 @@ class Chat(models.Model):
                                 on_delete=models.CASCADE,
                                 related_name='tenant_chat')
     date = models.DateField(default=date.today)
+    viewedLandlord = models.BooleanField(default=False)
+    viewedTenant = models.BooleanField(default=False)

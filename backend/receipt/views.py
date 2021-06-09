@@ -31,18 +31,18 @@ class ReceiptView(viewsets.ReadOnlyModelViewSet):
         return generics.get_object_or_404(Receipt, pk=item)
 
     def get_queryset(self):
+        queryset = Receipt.objects.all()
         user = User.objects.get(email=self.request.user)
-
+        payment = self.request.query_params.get('payment', None)
+        print(user)
         if user.is_landlord == True:
-            return Receipt.objects.filter(landlord_nif=user.nif)
+            print("entrei")
+            queryset = queryset.filter(landlord_nif=user.nif)
         elif user.is_tenant == True:
-            return Receipt.objects.filter(tenant_nif=user.nif)
+            queryset = queryset.filter(tenant_nif=user.nif)
 
-        payment = Payment.objects.filter(
-            lease=self.request.query_params.get('lease', None)
-        ).get(payment_number=self.request.query_params.get('payment_number', None))
-
-        if payment is not None:
-            return Receipt.objects.filter(payment=payment)
-        else:
-            return None
+        if payment:
+            payment = Payment.objects.get(pk=payment)
+            queryset = queryset.filter(payment=payment)
+        
+        return queryset

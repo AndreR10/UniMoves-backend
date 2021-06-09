@@ -80,28 +80,28 @@ class MyPaymentView(viewsets.ModelViewSet, PaymentWritePermission):
         return generics.get_object_or_404(Payment, pk=item)
 
     def get_queryset(self, *args, **kwargs):
+        queryset = Payment.objects.all()
         user = User.objects.get(email=self.request.user)
         lease = self.request.query_params.get('lease', None)
+        payment = self.request.query_params.get('payment', None)
 
-        if user is not None and lease is not None:
+        if lease:
             lease = Lease.objects.get(pk=self.request.query_params.get('lease'))
+            queryset = queryset.filter(lease=lease)
 
-            if user.is_tenant == True:
-                return Payment.objects.filter(lease=lease).filter(tenant=user)
-            else:
-                return Payment.objects.filter(lease=lease).filter(landlord=user)
+        if payment:
+            queryset = queryset.filter(pk=payment)
 
-        if user is not None:
-            if user.is_tenant == True:
-                return Payment.objects.filter(tenant=user)
-            else:
-                return Payment.objects.filter(landlord=user)
+        if user.is_tenant == True:
+            queryset = queryset.filter(tenant=user)
         else:
-            return None
+            queryset = queryset.filter(landlord=user)
+
+        return queryset
+
 
     def update(self, request, *args, **kwargs):
-        lease = Lease.objects.get(pk=self.kwargs['pk'])
-        payment = Payment.objects.filter(lease=lease).get(payment_number=self.request.data.get('payment_number'))
+        payment = Payment.objects.get(pk=self.kwargs['pk'])
         
         receipt = Receipt.objects.create(
             payment = payment,

@@ -73,86 +73,87 @@ class AccommodationView(viewsets.ReadOnlyModelViewSet):
             queryset = queryset.order_by("-publish_date")
 
         for accommodation in queryset:
-            features = Feature.objects.get(accommodation=accommodation)
-            rental_conditions = RentalCondition.objects.get(accommodation=accommodation)
+            if Feature.objects.filter(accommodation=accommodation.pk).exists() and RentalCondition.objects.filter(accommodation=accommodation.pk).exists():
+                features = Feature.objects.get(accommodation=accommodation)
+                rental_conditions = RentalCondition.objects.get(accommodation=accommodation)
 
-            if start_area and end_area:
-                if features.area not in range(int(start_area), int(end_area)):
-                    queryset = queryset.exclude(pk=accommodation.pk)
-                    continue
-            if occupancy:
-                if features.occupancy != int(occupancy):
-                    queryset = queryset.exclude(pk=accommodation.pk)
-                    continue
-            if rooms:
-                if features.rooms != int(rooms):
-                    queryset = queryset.exclude(pk=accommodation.pk)
-                    continue
-            if lift:
-                if features.lift != bool(lift):
-                    queryset = queryset.exclude(pk=accommodation.pk)
-                    continue
-            if furnished:
-                if features.furnished != bool(furnished):
-                    queryset = queryset.exclude(pk=accommodation.pk)
-                    continue
-            if accessibility:
-                if features.accessibility != bool(accessibility):
-                    queryset = queryset.exclude(pk=accommodation.pk)
-                    continue
-            if ac:
-                if features.ac != bool(ac):
-                    queryset = queryset.exclude(pk=accommodation.pk)
-                    continue
-            if heater:
-                if features.heater != bool(heater):
-                    queryset = queryset.exclude(pk=accommodation.pk)
-                    continue
-            if outside_area:
-                if features.outside_area != bool(outside_area):
-                    queryset = queryset.exclude(pk=accommodation.pk)
-                    continue
-            if wifi:
-                if features.wifi != bool(wifi):
-                    queryset = queryset.exclude(pk=accommodation.pk)
-                    continue
-            if tv:
-                if features.tv != bool(tv):
-                    queryset = queryset.exclude(pk=accommodation.pk)
-                    continue
-            if smoking:
-                if features.smoking != bool(smoking):
-                    queryset = queryset.exclude(pk=accommodation.pk)
-                    continue
-            if guest_stay:
-                if features.guest_stay != bool(guest_stay):
-                    queryset = queryset.exclude(pk=accommodation.pk)
-                    continue
-            if pets:
-                if features.pets != bool(pets):
-                    queryset = queryset.exclude(pk=accommodation.pk)
-                    continue
-            if solar_orientation:
-                if features.solar_orientation != solar_orientation:
-                    queryset = queryset.exclude(pk=accommodation.pk)
-                    continue
+                if start_area and end_area:
+                    if features.area not in range(int(start_area), int(end_area)):
+                        queryset = queryset.exclude(pk=accommodation.pk)
+                        continue
+                if occupancy:
+                    if features.occupancy != int(occupancy):
+                        queryset = queryset.exclude(pk=accommodation.pk)
+                        continue
+                if rooms:
+                    if features.rooms != int(rooms):
+                        queryset = queryset.exclude(pk=accommodation.pk)
+                        continue
+                if lift:
+                    if features.lift != bool(lift):
+                        queryset = queryset.exclude(pk=accommodation.pk)
+                        continue
+                if furnished:
+                    if features.furnished != bool(furnished):
+                        queryset = queryset.exclude(pk=accommodation.pk)
+                        continue
+                if accessibility:
+                    if features.accessibility != bool(accessibility):
+                        queryset = queryset.exclude(pk=accommodation.pk)
+                        continue
+                if ac:
+                    if features.ac != bool(ac):
+                        queryset = queryset.exclude(pk=accommodation.pk)
+                        continue
+                if heater:
+                    if features.heater != bool(heater):
+                        queryset = queryset.exclude(pk=accommodation.pk)
+                        continue
+                if outside_area:
+                    if features.outside_area != bool(outside_area):
+                        queryset = queryset.exclude(pk=accommodation.pk)
+                        continue
+                if wifi:
+                    if features.wifi != bool(wifi):
+                        queryset = queryset.exclude(pk=accommodation.pk)
+                        continue
+                if tv:
+                    if features.tv != bool(tv):
+                        queryset = queryset.exclude(pk=accommodation.pk)
+                        continue
+                if smoking:
+                    if features.smoking != bool(smoking):
+                        queryset = queryset.exclude(pk=accommodation.pk)
+                        continue
+                if guest_stay:
+                    if features.guest_stay != bool(guest_stay):
+                        queryset = queryset.exclude(pk=accommodation.pk)
+                        continue
+                if pets:
+                    if features.pets != bool(pets):
+                        queryset = queryset.exclude(pk=accommodation.pk)
+                        continue
+                if solar_orientation:
+                    if features.solar_orientation != solar_orientation:
+                        queryset = queryset.exclude(pk=accommodation.pk)
+                        continue
 
-            if contract_type:
-                if rental_conditions.contract_type != contract_type:
-                    queryset = queryset.exclude(pk=accommodation.pk)
-                    continue
-            if start_price and end_price:
-                if rental_conditions.price_per_month not in range(int(start_price), int(end_price)):
-                    queryset = queryset.exclude(pk=accommodation.pk)
-                    continue
-            if expenses:
-                if rental_conditions.expenses != bool(expenses):
-                    queryset = queryset.exclude(pk=accommodation.pk)
-                    continue
-            if cleaning_service:
-                if rental_conditions.cleaning_service != bool(cleaning_service):
-                    queryset = queryset.exclude(pk=accommodation.pk)
-                    continue
+                if contract_type:
+                    if rental_conditions.contract_type != contract_type:
+                        queryset = queryset.exclude(pk=accommodation.pk)
+                        continue
+                if start_price and end_price:
+                    if rental_conditions.price_per_month not in range(int(start_price), int(end_price)):
+                        queryset = queryset.exclude(pk=accommodation.pk)
+                        continue
+                if expenses:
+                    if rental_conditions.expenses != bool(expenses):
+                        queryset = queryset.exclude(pk=accommodation.pk)
+                        continue
+                if cleaning_service:
+                    if rental_conditions.cleaning_service != bool(cleaning_service):
+                        queryset = queryset.exclude(pk=accommodation.pk)
+                        continue
 
         return queryset
 
@@ -204,3 +205,6 @@ class LandlordAccommodationView(viewsets.ModelViewSet, AccommodationWritePermiss
             return Response(serializer.data)
         
         return Response(serializer.errors)
+    
+    def destroy(self, request, *args, **kwargs):
+        
