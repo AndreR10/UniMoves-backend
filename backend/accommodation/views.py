@@ -206,5 +206,5 @@ class LandlordAccommodationView(viewsets.ModelViewSet, AccommodationWritePermiss
         
         return Response(serializer.errors)
     
-    def destroy(self, request, *args, **kwargs):
+
         
